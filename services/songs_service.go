@@ -8,11 +8,12 @@ import (
 )
 
 type SongService interface {
-	 CreateSong(req models.CreateSongRequest) (*models.Song, error)
-	 GetSongByID(id uint) (*models.Song, error)
-	 GetSongs() ([]models.Song, error)
-	 UpdateSong(id uint, req models.UpdateSongRequest) (*models.Song, error)
-	 DeleteSong(id uint) error
+	CreateSong(req models.CreateSongRequest) (*models.Song, error)
+	GetSongByID(id uint) (*models.Song, error)
+	GetSongs() ([]models.Song, error)
+	GetSongsByCategoryiD(id uint) ([]models.Song, error)
+	UpdateSong(id uint, req models.UpdateSongRequest) (*models.Song, error)
+	DeleteSong(id uint) error
 }
 
 type songService struct {
@@ -21,7 +22,7 @@ type songService struct {
 
 func NewSongService(song repository.SongRepository) SongService {
 	return &songService{
-		song : song,
+		song: song,
 	}
 }
 
@@ -31,9 +32,10 @@ func (r *songService) CreateSong(req models.CreateSongRequest) (*models.Song, er
 	}
 
 	song := &models.Song{
-		SongName:  req.SongName,
-		Author:    req.Author,
-		GroupName: req.GroupName,
+		SongName:   req.SongName,
+		Author:     req.Author,
+		GroupName:  req.GroupName,
+		CategoryID: req.CategoryID,
 	}
 
 	if err := r.song.CreateSong(song); err != nil {
@@ -61,6 +63,15 @@ func (r *songService) GetSongs() ([]models.Song, error) {
 	return list, nil
 }
 
+func (r *songService) GetSongsByCategoryiD(id uint) ([]models.Song, error) {
+	songs, err := r.song.GetSongsByCategoryiD(id)
+	if err != nil {
+		return nil, fmt.Errorf("not found song category")
+	}
+
+	return songs, nil
+}
+
 func (r *songService) UpdateSong(id uint, req models.UpdateSongRequest) (*models.Song, error) {
 	song, err := r.song.GetByID(id)
 	if err != nil {
@@ -69,11 +80,11 @@ func (r *songService) UpdateSong(id uint, req models.UpdateSongRequest) (*models
 
 	r.applySongUpdate(song, req)
 
-	if err:= r.song.UpdateSongs(song); err !=nil {
-		return nil , fmt.Errorf("failed update song by id")
+	if err := r.song.UpdateSongs(song); err != nil {
+		return nil, fmt.Errorf("failed update song by id")
 	}
 
-	return  song, nil
+	return song, nil
 }
 
 func (r *songService) DeleteSong(id uint) error {
@@ -113,5 +124,9 @@ func (r *songService) applySongUpdate(song *models.Song, req models.UpdateSongRe
 
 	if req.GroupName != nil {
 		song.GroupName = *req.GroupName
+	}
+
+	if req.CategoryID != nil {
+		song.CategoryID = *req.CategoryID
 	}
 }

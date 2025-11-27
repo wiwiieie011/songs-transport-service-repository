@@ -4,25 +4,25 @@ import "gorm.io/gorm"
 
 type Song struct {
 	gorm.Model
-	
-	SongName  string
-	Author    string
-	GroupName string
 
-	CategoryID uint	
-	Category *Category
+	SongName  string `json:"song_name"`
+	Author    string `json:"author"`
+	GroupName string `json:"group_name"`
+
+	CategoryID uint      `json:"category_id" gorm:"index"`
+	Category   *Category `json:"-"`
 }
 
 type CreateSongRequest struct {
-	SongName  string
-	Author    string
-	GroupName string
-	CategoryID Category
+	SongName   string `json:"song_name"`
+	Author     string `json:"author"`
+	GroupName  string `json:"group_name"`
+	CategoryID uint   `json:"category_id"`
 }
 
 type UpdateSongRequest struct {
-	SongName  *string
-	Author    *string
-	GroupName *string
-	CategoryID uint	
+	SongName   *string `json:"song_name"`
+	Author     *string `json:"author"`
+	GroupName  *string `json:"group_name"`
+	CategoryID *uint   `json:"category_id"`
 }

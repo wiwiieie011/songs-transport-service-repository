@@ -11,7 +11,7 @@ type SongRepository interface {
 	CreateSong(song *models.Song) error
 	GetByID(id uint) (*models.Song, error)
 	GetSongsList() ([]models.Song, error)
-	GetSongsCategoryByiD(id uint) ([]models.Song, error)
+	GetSongsByCategoryiD(id uint) ([]models.Song, error)
 	UpdateSongs(song *models.Song) error
 	DeleteSong(id uint) error
 }
@@ -20,7 +20,7 @@ type songRepository struct {
 	db *gorm.DB
 }
 
-func NewCartRepository(db *gorm.DB) SongRepository {
+func NewSongRepository(db *gorm.DB) SongRepository {
 	return &songRepository{db: db}
 }
 
@@ -52,13 +52,13 @@ func (r *songRepository) GetSongsList() ([]models.Song, error) {
 	return songsList, nil
 }
 
-func (r *songRepository) GetSongsCategoryByiD(id uint) ([]models.Song, error){
-		var songs []models.Song
-		if err:= r.db.Preload("List").Where("category_id = ?", id).Find(&songs); err != nil {
-			return  nil , fmt.Errorf("error your links in db")
-		}
+func (r *songRepository) GetSongsByCategoryiD(id uint) ([]models.Song, error) {
+	var songs []models.Song
+	if err := r.db.Where("category_id = ?", id).Find(&songs).Error; err != nil {
+		return nil, fmt.Errorf("error your links in db")
+	}
 
-		return  songs,nil
+	return songs, nil
 }
 
 func (r *songRepository) UpdateSongs(song *models.Song) error {

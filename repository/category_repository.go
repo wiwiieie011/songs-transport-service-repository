@@ -8,6 +8,11 @@ import (
 )
 
 type CategoryRepo interface {
+	Create(category *models.Category) error
+	GetAll() ([]models.Category, error)
+	GetByID(id uint) (*models.Category, error)
+	UpdateCategory(category *models.Category) error
+	DeleteCategory(id uint) error
 }
 
 type categoryRepo struct {
@@ -30,10 +35,32 @@ func (r *categoryRepo) Create(category *models.Category) error {
 func (r *categoryRepo) GetByID(id uint) (*models.Category, error) {
 	var category models.Category
 
-	if err := r.db.First(&category, id).Error; err != nil {
+	if err := r.db.Preload("Songs").First(&category, id).Error; err != nil {
 		return nil, fmt.Errorf("record not found")
 	}
 
 	return &category, nil
 }
 
+func (r *categoryRepo) GetAll() ([]models.Category, error) {
+	if err := r.db.Find(&models.Category{}).Error; err != nil {
+		return nil, fmt.Errorf("record not found")
+	}
+
+	return []models.Category{}, nil
+}
+
+func (r *categoryRepo) UpdateCategory(category *models.Category) error {
+	if category == nil {
+		return nil
+	}
+
+	return r.db.Save(category).Error
+}
+
+func (r *categoryRepo) DeleteCategory(id uint) error {
+	if err := r.db.Delete(&models.Category{}, id).Error; err != nil {
+		return fmt.Errorf("not have deleted category")
+	}
+	return nil
+}

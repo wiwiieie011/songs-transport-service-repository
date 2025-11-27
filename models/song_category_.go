@@ -4,9 +4,14 @@ import "gorm.io/gorm"
 
 type Category struct {
 	gorm.Model
-	Name string
-	SongID uint
+	Name  string `json:"name"`
+	Songs []Song `json:"-"`
+}
 
-	Song *Song
-	List []Song `json:"list"`
+type CreateCategoryRequest struct {
+	Name string `json:"name"`
+}
+
+type UpdateCategoryRequest struct {
+	Name *string
 }
