@@ -43,11 +43,11 @@ func (r *categoryRepo) GetByID(id uint) (*models.Category, error) {
 }
 
 func (r *categoryRepo) GetAll() ([]models.Category, error) {
-	if err := r.db.Find(&models.Category{}).Error; err != nil {
-		return nil, fmt.Errorf("record not found")
-	}
-
-	return []models.Category{}, nil
+	 var categories []models.Category
+    if err := r.db.Find(&categories).Error; err != nil {
+        return nil, err
+    }
+    return categories, nil
 }
 
 func (r *categoryRepo) UpdateCategory(category *models.Category) error {
