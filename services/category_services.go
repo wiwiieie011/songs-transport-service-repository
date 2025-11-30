@@ -28,7 +28,7 @@ func NewCategoryService(category repository.CategoryRepo) CategoryService {
 func (r *categoryService) CreateCategory(req models.CreateCategoryRequest) (*models.Category, error) {
 
 	if req.Name == "" {
-		return nil, fmt.Errorf("empty categort name !")
+		return nil, fmt.Errorf("empty category name")
 	}
 
 	category := &models.Category{
