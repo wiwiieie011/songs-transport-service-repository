@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"gorm.io/gorm"
 )
@@ -16,17 +17,21 @@ type CategoryRepo interface {
 }
 
 type categoryRepo struct {
-	db *gorm.DB
+	logger *logrus.Logger
+	db     *gorm.DB
 }
 
-func NewCategoryRepository(db *gorm.DB) CategoryRepo {
-	return &categoryRepo{db: db}
+func NewCategoryRepository(db *gorm.DB, logger *logrus.Logger) CategoryRepo {
+	return &categoryRepo{
+		db:     db,
+		logger: logger,
+	}
 }
 
 func (r *categoryRepo) Create(category *models.Category) error {
 	if category == nil {
-		// return fmt.Errorf("error create category")
-		return nil
+		r.logger.Error("error in Create repository.category db")
+		return fmt.Errorf("error create category")
 	}
 
 	return r.db.Create(category).Error
@@ -36,22 +41,24 @@ func (r *categoryRepo) GetByID(id uint) (*models.Category, error) {
 	var category models.Category
 
 	if err := r.db.Preload("Songs").First(&category, id).Error; err != nil {
+		r.logger.WithError(err).Error("error  GetByID repository.category function")
 		return nil, fmt.Errorf("record not found")
 	}
-
 	return &category, nil
 }
 
 func (r *categoryRepo) GetAll() ([]models.Category, error) {
-	 var categories []models.Category
-    if err := r.db.Find(&categories).Error; err != nil {
-        return nil, err
-    }
-    return categories, nil
+	var categories []models.Category
+	if err := r.db.Find(&categories).Error; err != nil {
+		r.logger.WithError(err).Error("error in GetAll repository.category function")
+		return nil, err
+	}
+	return categories, nil
 }
 
 func (r *categoryRepo) UpdateCategory(category *models.Category) error {
 	if category == nil {
+		r.logger.Error("error in UpdateCategory repository.category function")
 		return nil
 	}
 
@@ -60,6 +67,7 @@ func (r *categoryRepo) UpdateCategory(category *models.Category) error {
 
 func (r *categoryRepo) DeleteCategory(id uint) error {
 	if err := r.db.Delete(&models.Category{}, id).Error; err != nil {
+		r.logger.WithError(err).Error("error in Delete repository.category function")
 		return fmt.Errorf("not have deleted category")
 	}
 	return nil

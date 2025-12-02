@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"gorm.io/gorm"
 )
@@ -17,11 +18,15 @@ type SongRepository interface {
 }
 
 type songRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger *logrus.Logger
 }
 
-func NewSongRepository(db *gorm.DB) SongRepository {
-	return &songRepository{db: db}
+func NewSongRepository(db *gorm.DB, logger *logrus.Logger) SongRepository {
+	return &songRepository{
+		db:     db,
+		logger: logger,
+	}
 }
 
 func (r *songRepository) CreateSong(song *models.Song) error {
@@ -36,6 +41,7 @@ func (r *songRepository) GetByID(id uint) (*models.Song, error) {
 	var songs models.Song
 
 	if err := r.db.First(&songs, id).Error; err != nil {
+		r.logger.WithError(err).Error("error GetByID in repository.songs function")
 		return nil, fmt.Errorf("record not found")
 	}
 
@@ -46,6 +52,7 @@ func (r *songRepository) GetSongsList() ([]models.Song, error) {
 	var songsList []models.Song
 
 	if err := r.db.Find(&songsList).Error; err != nil {
+		r.logger.WithError(err).Error("error GetByID in repository.songs function")
 		return nil, fmt.Errorf("not have songs")
 	}
 
@@ -55,6 +62,7 @@ func (r *songRepository) GetSongsList() ([]models.Song, error) {
 func (r *songRepository) GetSongsByCategoryiD(id uint) ([]models.Song, error) {
 	var songs []models.Song
 	if err := r.db.Where("category_id = ?", id).Find(&songs).Error; err != nil {
+		r.logger.WithError(err).Error("error GetByID in repository.songs function")
 		return nil, fmt.Errorf("error your links in db")
 	}
 

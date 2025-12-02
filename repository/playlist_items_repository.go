@@ -3,6 +3,7 @@ package repository
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"gorm.io/gorm"
 )
@@ -14,11 +15,15 @@ type PlayListItemsRepository interface {
 }
 
 type playListItemsRepository struct {
-	db *gorm.DB
+	db     *gorm.DB
+	logger *logrus.Logger
 }
 
-func NewPlayListItemsRepository(db *gorm.DB) PlayListItemsRepository {
-	return &playListItemsRepository{db: db}
+func NewPlayListItemsRepository(db *gorm.DB, logger *logrus.Logger) PlayListItemsRepository {
+	return &playListItemsRepository{
+		db:     db,
+		logger: logger,
+	}
 }
 
 func (r *playListItemsRepository) Create(items *models.PlayListItems) error {
@@ -32,8 +37,10 @@ func (r *playListItemsRepository) Create(items *models.PlayListItems) error {
 func (r *playListItemsRepository) GetByID(pid, sid uint) (*models.PlayListItems, error) {
 	var playlist models.PlayListItems
 	if err := r.db.Where("playlist_id = ? AND song_id = ?", pid, sid).First(&playlist).Error; err != nil {
+		r.logger.WithError(err).Error("error  GetByID repository.playlist_items function")
 		return nil, fmt.Errorf("not found")
 	}
+
 	return &playlist, nil
 }
 

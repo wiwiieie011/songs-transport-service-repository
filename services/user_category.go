@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"github.com/wiwiieie011/songs/repository"
 )
@@ -17,11 +18,15 @@ type UserServices interface {
 }
 
 type userServices struct {
-	user repository.UserRepository
+	user   repository.UserRepository
+	logger *logrus.Logger
 }
 
-func NewUserService(user repository.UserRepository) UserServices {
-	return &userServices{user: user}
+func NewUserService(user repository.UserRepository, logger *logrus.Logger) UserServices {
+	return &userServices{
+		user:   user,
+		logger: logger,
+	}
 }
 
 func (r *userServices) CreateUser(req models.CreateUserRequest) (*models.User, error) {
@@ -34,6 +39,7 @@ func (r *userServices) CreateUser(req models.CreateUserRequest) (*models.User, e
 	}
 
 	if err := r.user.CreateUser(user); err != nil {
+		r.logger.WithError(err).Error("error CreateUser in services.user function")
 		return nil, err
 	}
 
@@ -43,6 +49,7 @@ func (r *userServices) CreateUser(req models.CreateUserRequest) (*models.User, e
 func (r *userServices) GetUserByID(id uint) (*models.User, error) {
 	user, err := r.user.GetUserByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetUserByID in services.user function")
 		return nil, err
 	}
 
@@ -51,6 +58,7 @@ func (r *userServices) GetUserByID(id uint) (*models.User, error) {
 func (r *userServices) GetByID(id uint) (*models.User, error) {
 	user, err := r.user.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetByID in services.user function")
 		return nil, err
 	}
 
@@ -60,6 +68,7 @@ func (r *userServices) GetByID(id uint) (*models.User, error) {
 func (r *userServices) GetAllUsers() ([]models.User, error) {
 	list, err := r.user.GetAllUsers()
 	if err != nil {
+		r.logger.WithError(err).Error("error GetAllUsers in services.user function")
 		return nil, err
 	}
 
@@ -69,11 +78,13 @@ func (r *userServices) GetAllUsers() ([]models.User, error) {
 func (r *userServices) UpdatsUser(id uint, req models.UpdateUserRequest) (*models.User, error) {
 	user, err := r.user.GetUserByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetUserByID in services.user function")
 		return nil, err
 	}
 	r.apllyUpdate(user, req)
 
 	if err := r.user.Update(user); err != nil {
+		r.logger.WithError(err).Error("error UpdateUser in services.user function")
 		return nil, err
 	}
 
@@ -81,7 +92,8 @@ func (r *userServices) UpdatsUser(id uint, req models.UpdateUserRequest) (*model
 }
 
 func (r *userServices) DeleteUser(id uint) error {
-	if _, err := r.user.GetUserByID(id); err != nil {
+	if err := r.user.Delete(id); err != nil {
+		r.logger.WithError(err).Error("error DeleteUser in services.user function")
 		return fmt.Errorf("record by delete not found")
 	}
 

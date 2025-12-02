@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"github.com/wiwiieie011/songs/repository"
 )
@@ -17,11 +18,13 @@ type CategoryService interface {
 
 type categoryService struct {
 	category repository.CategoryRepo
+	logger   *logrus.Logger
 }
 
-func NewCategoryService(category repository.CategoryRepo) CategoryService {
+func NewCategoryService(category repository.CategoryRepo, logger *logrus.Logger) CategoryService {
 	return &categoryService{
 		category: category,
+		logger:   logger,
 	}
 }
 
@@ -45,6 +48,7 @@ func (r *categoryService) CreateCategory(req models.CreateCategoryRequest) (*mod
 func (r *categoryService) GetAll() ([]models.Category, error) {
 	list, err := r.category.GetAll()
 	if err != nil {
+		r.logger.WithError(err).Error("error GetAll in services.category function")
 		return nil, fmt.Errorf("no found category list")
 	}
 	return list, nil
@@ -53,6 +57,7 @@ func (r *categoryService) GetAll() ([]models.Category, error) {
 func (r *categoryService) GetByID(id uint) (*models.Category, error) {
 	category, err := r.category.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetByID in services.category function")
 		return nil, fmt.Errorf("invalid category id")
 	}
 
@@ -62,12 +67,14 @@ func (r *categoryService) GetByID(id uint) (*models.Category, error) {
 func (r *categoryService) UpdateCategory(id uint, req models.UpdateCategoryRequest) (*models.Category, error) {
 	category, err := r.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error UpdateCategory in services.category function")
 		return nil, err
 	}
 
 	r.applyCategory(category, req)
 
 	if err := r.category.UpdateCategory(category); err != nil {
+		r.logger.WithError(err).Error("error UpdateCategory in services.category function")
 		return nil, fmt.Errorf("failed update song by id")
 	}
 
@@ -77,6 +84,7 @@ func (r *categoryService) UpdateCategory(id uint, req models.UpdateCategoryReque
 func (r *categoryService) DeleteCategory(id uint) error {
 	_, err := r.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error DeleteCategory in services.category function")
 		return err
 	}
 

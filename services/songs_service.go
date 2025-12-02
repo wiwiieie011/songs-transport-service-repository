@@ -3,6 +3,7 @@ package services
 import (
 	"fmt"
 
+	"github.com/sirupsen/logrus"
 	"github.com/wiwiieie011/songs/models"
 	"github.com/wiwiieie011/songs/repository"
 )
@@ -17,12 +18,14 @@ type SongService interface {
 }
 
 type songService struct {
-	song repository.SongRepository
+	song   repository.SongRepository
+	logger *logrus.Logger
 }
 
-func NewSongService(song repository.SongRepository) SongService {
+func NewSongService(song repository.SongRepository, logger *logrus.Logger) SongService {
 	return &songService{
-		song: song,
+		song:   song,
+		logger: logger,
 	}
 }
 
@@ -39,6 +42,7 @@ func (r *songService) CreateSong(req models.CreateSongRequest) (*models.Song, er
 	}
 
 	if err := r.song.CreateSong(song); err != nil {
+		r.logger.WithError(err).Error("error CreateSong in services.songs function")
 		return nil, fmt.Errorf("error create song")
 	}
 
@@ -48,6 +52,7 @@ func (r *songService) CreateSong(req models.CreateSongRequest) (*models.Song, er
 func (r *songService) GetSongByID(id uint) (*models.Song, error) {
 	song, err := r.song.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetSongByID in services.songs function")
 		return nil, fmt.Errorf("record not found by id")
 	}
 
@@ -57,6 +62,7 @@ func (r *songService) GetSongByID(id uint) (*models.Song, error) {
 func (r *songService) GetSongs() ([]models.Song, error) {
 	list, err := r.song.GetSongsList()
 	if err != nil {
+		r.logger.WithError(err).Error("error GetSongByID in services.songs function")
 		return nil, fmt.Errorf("record not found")
 	}
 
@@ -66,6 +72,7 @@ func (r *songService) GetSongs() ([]models.Song, error) {
 func (r *songService) GetSongsByCategoryiD(id uint) ([]models.Song, error) {
 	songs, err := r.song.GetSongsByCategoryiD(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error GetSongByCategoryID in services.songs function")
 		return nil, fmt.Errorf("not found song category")
 	}
 
@@ -75,12 +82,14 @@ func (r *songService) GetSongsByCategoryiD(id uint) ([]models.Song, error) {
 func (r *songService) UpdateSong(id uint, req models.UpdateSongRequest) (*models.Song, error) {
 	song, err := r.song.GetByID(id)
 	if err != nil {
+		r.logger.WithError(err).Error("error UpdateSong in services.songs function")
 		return nil, fmt.Errorf("record not found by id")
 	}
 
 	r.applySongUpdate(song, req)
 
 	if err := r.song.UpdateSongs(song); err != nil {
+		r.logger.WithError(err).Error("error UpdateSong in services.songs function")
 		return nil, fmt.Errorf("failed update song by id")
 	}
 
@@ -89,6 +98,7 @@ func (r *songService) UpdateSong(id uint, req models.UpdateSongRequest) (*models
 
 func (r *songService) DeleteSong(id uint) error {
 	if _, err := r.song.GetByID(id); err != nil {
+		r.logger.WithError(err).Error("error UpdateSong in services.songs function")
 		return fmt.Errorf("record by delete not found")
 	}
 
