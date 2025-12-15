@@ -10,30 +10,30 @@ import (
 )
 
 func SetUpDatabaseConnection() *gorm.DB {
-    // Загружаем .env
-    if err := godotenv.Load(".env"); err != nil {
-        panic(fmt.Sprintf("Error loading .env file: %v", err))
-    }
+	// Загружаем .env если он есть, иначе продолжаем использовать переменные окружения
+	if err := godotenv.Load(".env"); err != nil {
+		fmt.Println("Warning: .env file not found, using environment variables")
+	}
 
-    dbUser := os.Getenv("DB_USER")
-    dbPass := os.Getenv("DB_PASSWORD") // ⚡ нужно совпадать с .env
-    dbHost := os.Getenv("DB_HOST")
-    dbName := os.Getenv("DB_NAME")
-    dbPort := os.Getenv("DB_PORT")
-    dbSSLMode := os.Getenv("DB_SSLMODE")
-    dsn := fmt.Sprintf(
-        "host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
-        dbHost, dbUser, dbPass, dbName, dbPort, dbSSLMode,
-    )
+	dbUser := os.Getenv("DB_USER")
+	dbPass := os.Getenv("DB_PASSWORD") // ⚡ нужно совпадать с .env
+	dbHost := os.Getenv("DB_HOST")
+	dbName := os.Getenv("DB_NAME")
+	dbPort := os.Getenv("DB_PORT")
+	dbSSLMode := os.Getenv("DB_SSLMODE")
+	dsn := fmt.Sprintf(
+		"host=%s user=%s password=%s dbname=%s port=%s sslmode=%s",
+		dbHost, dbUser, dbPass, dbName, dbPort, dbSSLMode,
+	)
 
-    db, err := gorm.Open(postgres.New(postgres.Config{
-        DSN:                  dsn,
-        PreferSimpleProtocol: true,
-    }), &gorm.Config{})
+	db, err := gorm.Open(postgres.New(postgres.Config{
+		DSN:                  dsn,
+		PreferSimpleProtocol: true,
+	}), &gorm.Config{})
 
-    if err != nil {
-        panic(fmt.Sprintf("failed to connect database: %v", err))
-    }
+	if err != nil {
+		panic(fmt.Sprintf("failed to connect database: %v", err))
+	}
 
-    return db
+	return db
 }

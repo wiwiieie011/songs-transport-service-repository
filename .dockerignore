@@ -1,0 +1,8 @@
+.git
+.gitignore
+*.md
+.env
+bin/
+vendor/
+**/*_test.go
+.DS_Store
